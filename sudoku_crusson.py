@@ -431,7 +431,7 @@ if __name__ == "__main__":
         pf = open(sys.argv[1], 'r')
 
         # How many puzzles do we want to solve
-        max_to_solve = 99
+        max_to_solve = 24
 
         # Variable to keep track of the number of puzzles solved
         num_solved = 0
