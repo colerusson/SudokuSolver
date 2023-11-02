@@ -173,9 +173,38 @@ class Sudoku():
 
         # Modify these return values!!
         if mode == 'remove':
+            for r in range(9):
+                if r != row:
+                    if not self.cells[r][column].remove_value(value):
+                        return False
+            for c in range(9):
+                if c != column:
+                    if not self.cells[row][c].remove_value(value):
+                        return False
+            grid, cell = self.get_grid_cell(row, column)
+            for i in range(9):
+                if i != cell:
+                    r, c = self.get_row_column(grid, i)
+                    if not self.cells[r][c].remove_value(value):
+                        return False
             return True
         elif mode == 'count':
-            return 0
+            count = 0
+            for r in range(9):
+                if r != row:
+                    if value in self.cells[r][column].domain:
+                        count += 1
+            for c in range(9):
+                if c != column:
+                    if value in self.cells[row][c].domain:
+                        count += 1
+            grid, cell = self.get_grid_cell(row, column)
+            for i in range(9):
+                if i != cell:
+                    r, c = self.get_row_column(grid, i)
+                    if value in self.cells[r][c].domain:
+                        count += 1
+            return count
 
     def get_row_column(self, grid, cell):
         '''
@@ -212,7 +241,16 @@ def mrv(puzzle, unassigned):
     '''
 
     # Change this.  Return your list of minimum remaining value locations
-    return unassigned
+    min_r = 9
+    mr_variables = []
+    for u in unassigned:
+        cur_r = len(puzzle.cells[u[0]][u[1]].domain)
+        if cur_r == min_r:
+            mr_variables.append(u)
+        if cur_r < min_r:
+            min_r = cur_r
+            mr_variables = [u]
+    return mr_variables
 
 
 def max_degree(puzzle, tied):
@@ -245,7 +283,22 @@ def count_constraints(puzzle, row, column):
     # TASK 3 CODE HERE
 
     # MODIFY THIS
-    # return 0
+    count = 0
+    for r in range(9):
+        if r != row:
+            if puzzle.cells[r][column].value is None:
+                count += 1
+    for c in range(9):
+        if c != column:
+            if puzzle.cells[row][c].value is None:
+                count += 1
+    grid, cell = puzzle.get_grid_cell(row, column)
+    for i in range(9):
+        if i != cell:
+            r, c = puzzle.get_row_column(grid, i)
+            if puzzle.cells[r][c].value is None:
+                count += 1
+    return count
 
 
 def get_unassigned_variables(puzzle):
@@ -303,7 +356,11 @@ def order_values(puzzle, row, column):
     # TASK 5 CODE HERE
 
     # Change this to return an ordered list
-    return domain
+    values = []
+    for d in domain:
+        values.append((d, puzzle.forward_check(row, column, d, 'count')))
+    values.sort(key=lambda x: x[1])
+    return [v[0] for v in values]
 
 
 def backtracking_search(puzzle):
